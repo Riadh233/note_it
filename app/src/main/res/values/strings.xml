@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">to_do_app</string>
+    <string name="search">search\n</string>
+    <string name="clear_search_text_icon">clear search bar\n</string>
+</resources>
