@@ -4,6 +4,7 @@ import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -44,18 +45,19 @@ fun SearchBar(
         value = searchText,
         onValueChange = updateSearchQuery,
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxWidth().height(50.dp)
             .background(
-                MaterialTheme.colorScheme
+                shape = RoundedCornerShape(20.dp),
+               color =  MaterialTheme.colorScheme
                     .surfaceColorAtElevation(6.dp)
             )
             .onFocusChanged { focusState -> isFocused.value = focusState.isFocused },
-        placeholder = { Text(text = "Search Notes", color = Color.LightGray) },
+        placeholder = { Text(text = "Search Notes", color = MaterialTheme.colorScheme.onSurface) },
         leadingIcon = {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = stringResource(R.string.search),
-                tint = Color.LightGray
+                tint = MaterialTheme.colorScheme.onSurface
             )
         },
         trailingIcon = {
@@ -64,10 +66,11 @@ fun SearchBar(
                     modifier = Modifier.clickable { updateSearchQuery("") },
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.clear_search_text_icon),
-                    tint = Color.LightGray
+                    tint = MaterialTheme.colorScheme.onSurface
                 )
         },
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(20.dp),
+
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions {
             keyboardController?.hide()

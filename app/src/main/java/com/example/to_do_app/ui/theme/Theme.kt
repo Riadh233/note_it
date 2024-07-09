@@ -38,6 +38,7 @@ private val lightScheme = lightColorScheme(
     onSurface = onSurfaceLight,
     surfaceVariant = surfaceVariantLight,
     onSurfaceVariant = onSurfaceVariantLight,
+    surfaceTint = surfaceVariantLight,
     outline = outlineLight,
     outlineVariant = outlineVariantLight,
     scrim = scrimLight,
@@ -74,7 +75,7 @@ private val darkScheme = darkColorScheme(
     scrim = scrimDark,
     inverseSurface = inverseSurfaceDark,
     inverseOnSurface = inverseOnSurfaceDark,
-    inversePrimary = inversePrimaryDark,
+    inversePrimary = inversePrimaryDark
 )
 
 

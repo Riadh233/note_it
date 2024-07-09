@@ -1,8 +1,16 @@
 package com.example.to_do_app.ui.screens
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -10,12 +18,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,21 +45,20 @@ import com.example.to_do_app.ui.composables.SearchBar
 
 @Composable
 fun NotesScreen(
+    modifier: Modifier,
     notesList: List<Note>,
     onNoteClicked: (Int) -> Unit,
-    searchText : String,
-    onUpdateSearchQuery : (String) -> Unit
+    searchText: String,
+    onUpdateSearchQuery: (String) -> Unit,
+    onDeleteNote: (Note) -> Unit
 ) {
     Column(
-        modifier = Modifier.padding(6.dp),
-        verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.Start) {
-        Text(
-            text = "Note it!", style = MaterialTheme.typography.headlineLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Bold,
-        )
+        modifier = modifier.padding(10.dp),
+        verticalArrangement = Arrangement.Top, horizontalAlignment = Alignment.Start
+    ) {
+
         Spacer(modifier = Modifier.height(10.dp))
-        SearchBar(searchText = searchText , updateSearchQuery = onUpdateSearchQuery)
+        SearchBar(searchText = searchText, updateSearchQuery = onUpdateSearchQuery)
         Spacer(modifier = Modifier.height(10.dp))
 
         LazyVerticalStaggeredGrid(
@@ -57,7 +73,7 @@ fun NotesScreen(
                 val note = notesList[i]
                 if (note != Note.EMPTY_NOTE) {
                     Log.d("note", note.toString())
-                    NoteItem(note = note, onNoteClicked = onNoteClicked)
+                    NoteItem(note = note, onNoteClicked = onNoteClicked, onDeleteNote)
                 }
             }
         }
@@ -68,36 +84,66 @@ fun NotesScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteItem(note: Note, onNoteClicked: (Int) -> Unit) {
-    val noteColor = if (note.color == -1) MaterialTheme.colorScheme.surface else Color(note.color)
-    Card(
-        modifier = Modifier,
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        colors = CardDefaults.cardColors(containerColor = noteColor),
-        shape = RoundedCornerShape(size = 14.dp),
-        onClick = {
-            onNoteClicked(note.id)
-        },
+fun NoteItem(note: Note, onNoteClicked: (Int) -> Unit, onDeleteNote: (Note) -> Unit) {
+    val noteColor = if (note.color == -1L) MaterialTheme.colorScheme.surface else Color(note.color).copy(alpha = 0.5f)
+    val isVisible by remember { mutableStateOf(true) }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        exit = fadeOut(animationSpec = tween(durationMillis = 300))
     ) {
-        Log.d("note id ", note.id.toString())
-        Column(modifier = Modifier.padding(6.dp)) {
-            Text(
-                text = note.title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(3.dp))
-            Text(
-                text = note.content,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Normal,
-                maxLines = 15,
-                overflow = TextOverflow.Ellipsis
-            )
+        Card(
+            elevation = CardDefaults.elevatedCardElevation(2.dp),
+            shape = RoundedCornerShape(size = 14.dp),
+            onClick = {
+                onNoteClicked(note.id)
+            },
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(color = noteColor)
+            ) {
+                IconButton(
+                    onClick = { onDeleteNote(note) },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+
+                ) {
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "remove note")
+                }
+                Column(
+                    modifier = Modifier
+                        .padding(6.dp)
+                        .fillMaxSize()
+                ) {
+                    Text(
+                        text = note.title,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(3.dp))
+                    Text(
+                        text = note.content,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Normal,
+                        maxLines = 15,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = note.timestamp,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
         }
     }
 }

@@ -1,33 +1,35 @@
 package com.example.to_do_app.domain.model
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.graphics.toArgb
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.to_do_app.utils.Constants.NOTE_ENTITY
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Entity(tableName = NOTE_ENTITY)
 data class Note(
     @PrimaryKey(autoGenerate = true) val id : Int = 0,
     val title : String,
     val content : String,
-    val timestamp : Long,
-    val color : Int
+    val timestamp : String,
+    val color : Long
 ){
     companion object{
         val EMPTY_NOTE = Note(
             title = "",
             content = "",
-            timestamp = -1L,
-            color = -1
+            timestamp = getCurrentDate(),
+            color = -1L
         )
     }
     fun Note.copy(
         id : Long? = -1,
         title: String? = null,
         content: String? = null,
-        timestamp: Long? = null,
-        color: Int? = null
+        timestamp: String? = null,
+        color: Long? = null
     ): Note {
         return Note(
             id = this.id, // Assuming ID should remain the same
@@ -37,4 +39,9 @@ data class Note(
             color = color ?: this.color
         )
     }
+}
+fun getCurrentDate(): String {
+    val currentDate = LocalDate.now()
+    val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
+    return currentDate.format(formatter)
 }
