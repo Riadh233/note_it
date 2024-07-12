@@ -9,7 +9,7 @@
  - Tested on : Pixel 4a Device Android 13 (API Level 33) , Redmi 8A Android 10 (API Level 29), Emulator Pixel Android 13 (Api Level 33)
    you can get a generated APK-Release file from this [Link](https://drive.google.com/file/d/1qcH2oej8tUVeLvtFt1eqC4cstcTGT8fH/view?usp=sharing)
 
-#Features
+# Features
 - Saving your daily notes and todos
 - Schedule reminders
 - Color your notes
