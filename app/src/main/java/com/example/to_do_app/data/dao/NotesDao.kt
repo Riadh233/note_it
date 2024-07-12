@@ -11,10 +11,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NotesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertNote(note: Note)
+    fun insertNote(note: Note) : Long
 
     @Query("SELECT * FROM notes_table WHERE id = :id")
-    fun getNoteById(id: Int) : Note
+    fun getNoteById(id: Long) : Note
 
     @Query("SELECT * FROM notes_table")
     fun getAllNotes(): Flow<List<Note>>
@@ -24,5 +24,8 @@ interface NotesDao {
 
     @Query("DELETE FROM notes_table")
     suspend fun deleteAllNotes()
+
+    @Query("UPDATE notes_table SET alarmTime = NULL WHERE id = :id")
+    suspend fun resetNoteAlarm(id: Long)
 
 }

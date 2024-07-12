@@ -17,6 +17,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.compose.AppTheme
+import com.example.to_do_app.data.alarms.AlarmScheduler
 import com.example.to_do_app.ui.navigation.addEditScreenPage
 import com.example.to_do_app.ui.navigation.noteScreenPage
 import com.example.to_do_app.ui.viewmodels.AddEditNoteViewModel
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
     @SuppressLint(
         "UnusedMaterial3ScaffoldPaddingParameter", "SuspiciousIndentation",
         "StateFlowValueCalledInComposition"
@@ -50,16 +52,21 @@ class MainActivity : ComponentActivity() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            MyAppNavHost(navController = navController, noteViewModel = noteViewModel, addEditNoteViewModel = addEditNoteViewModel)
+            MyAppNavHost(
+                navController = navController,
+                noteViewModel = noteViewModel,
+                addEditNoteViewModel = addEditNoteViewModel,
+            )
         }
     }
+
     @Composable
     fun MyAppNavHost(
         navController: NavHostController,
         noteViewModel: NoteViewModel,
-        addEditNoteViewModel: AddEditNoteViewModel
-    ){
-        Log.d("note state","nav host called")
+        addEditNoteViewModel: AddEditNoteViewModel,
+    ) {
+        Log.d("note state", "nav host called")
         NavHost(
             navController = navController,
             modifier = Modifier,
@@ -68,11 +75,11 @@ class MainActivity : ComponentActivity() {
             noteScreenPage(
                 navController = navController,
                 noteViewModel = noteViewModel,
-                addEditNoteViewModel = addEditNoteViewModel
+                addEditNoteViewModel = addEditNoteViewModel,
             )
             addEditScreenPage(
                 navController = navController,
-                addEditNoteViewModel = addEditNoteViewModel
+                addEditNoteViewModel = addEditNoteViewModel,
             )
         }
     }

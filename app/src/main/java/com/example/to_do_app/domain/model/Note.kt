@@ -1,7 +1,5 @@
 package com.example.to_do_app.domain.model
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.to_do_app.utils.Constants.NOTE_ENTITY
@@ -10,33 +8,36 @@ import java.time.format.DateTimeFormatter
 
 @Entity(tableName = NOTE_ENTITY)
 data class Note(
-    @PrimaryKey(autoGenerate = true) val id : Int = 0,
+    @PrimaryKey(autoGenerate = true) val id : Long = 0,
     val title : String,
     val content : String,
     val timestamp : String,
-    val color : Long
+    val color : Long,
+    val alarmTime : Long?
 ){
     companion object{
         val EMPTY_NOTE = Note(
             title = "",
             content = "",
             timestamp = getCurrentDate(),
-            color = -1L
+            color = -1L,
+            alarmTime = null
         )
     }
     fun Note.copy(
-        id : Long? = -1,
         title: String? = null,
         content: String? = null,
         timestamp: String? = null,
-        color: Long? = null
+        color: Long? = null,
+        alarmTime: Long? = null
     ): Note {
         return Note(
             id = this.id, // Assuming ID should remain the same
             title = title ?: this.title,
             content = content ?: this.content,
             timestamp = timestamp ?: this.timestamp,
-            color = color ?: this.color
+            color = color ?: this.color,
+            alarmTime = alarmTime ?: this.alarmTime
         )
     }
 }

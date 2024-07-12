@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,14 +33,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.to_do_app.domain.model.Note
 import com.example.to_do_app.ui.composables.SearchBar
 
@@ -47,10 +47,10 @@ import com.example.to_do_app.ui.composables.SearchBar
 fun NotesScreen(
     modifier: Modifier,
     notesList: List<Note>,
-    onNoteClicked: (Int) -> Unit,
+    onNoteClicked: (Long) -> Unit,
     searchText: String,
     onUpdateSearchQuery: (String) -> Unit,
-    onDeleteNote: (Note) -> Unit
+    onDeleteNote: (Note) -> Unit,
 ) {
     Column(
         modifier = modifier.padding(10.dp),
@@ -84,8 +84,9 @@ fun NotesScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteItem(note: Note, onNoteClicked: (Int) -> Unit, onDeleteNote: (Note) -> Unit) {
-    val noteColor = if (note.color == -1L) MaterialTheme.colorScheme.surface else Color(note.color).copy(alpha = 0.5f)
+fun NoteItem(note: Note, onNoteClicked: (Long) -> Unit, onDeleteNote: (Note) -> Unit) {
+    val noteColor =
+        if (note.color == -1L) MaterialTheme.colorScheme.surface else Color(note.color).copy(alpha = 0.5f)
     val isVisible by remember { mutableStateOf(true) }
 
     AnimatedVisibility(
@@ -103,15 +104,28 @@ fun NoteItem(note: Note, onNoteClicked: (Int) -> Unit, onDeleteNote: (Note) -> U
                 modifier = Modifier
                     .fillMaxSize()
                     .background(color = noteColor)
+                    .padding(3.dp),
             ) {
-                IconButton(
-                    onClick = { onDeleteNote(note) },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
 
-                ) {
-                    Icon(imageVector = Icons.Default.Close, contentDescription = "remove note")
-                }
+                Icon(imageVector = Icons.Default.Close,
+                    contentDescription = "remove note",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onDeleteNote(note) }
+                        .align(Alignment.TopEnd)
+                )
+
+                Text(
+                    text = note.timestamp,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 10.sp,
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 3.dp, bottom = 3.dp)
+                )
+
                 Column(
                     modifier = Modifier
                         .padding(6.dp)
@@ -136,12 +150,9 @@ fun NoteItem(note: Note, onNoteClicked: (Int) -> Unit, onDeleteNote: (Note) -> U
                     )
                     Spacer(modifier = Modifier.height(2.dp))
 
-                    Text(
-                        text = note.timestamp,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    if (note.alarmTime != null) {
+                        AlarmItem(alarmTime = formatMillisToDateTime(note.alarmTime),showCancelButton = false){}
+                    }
                 }
             }
         }

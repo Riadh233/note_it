@@ -4,9 +4,10 @@ package com.example.to_do_app.ui.viewmodels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.to_do_app.MyApplication
+import com.example.to_do_app.data.alarms.AlarmScheduler
 import com.example.to_do_app.domain.model.Note
 import com.example.to_do_app.domain.repository.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddEditNoteViewModel @Inject constructor(
     private val noteRepository: NoteRepository,
+    private val alarmScheduler: AlarmScheduler
 ) : ViewModel() {
     private val _noteState = MutableStateFlow<Note>(Note.EMPTY_NOTE)
     val notesState: StateFlow<Note> = _noteState
@@ -25,9 +27,13 @@ class AddEditNoteViewModel @Inject constructor(
     var showColorPicker by mutableStateOf(false)
         private set
 
-    fun getNoteById(noteId : Int){
+    var showTimePicker by mutableStateOf(false)
+        private set
+
+
+    fun getNoteById(noteId : Long){
         viewModelScope.launch {
-            if(noteId != 0){
+            if(noteId != 0L){
                 _noteState.value = noteRepository.getNoteById(id = noteId)
             }else{
                 _noteState.value = Note.EMPTY_NOTE
@@ -47,12 +53,28 @@ class AddEditNoteViewModel @Inject constructor(
 
     fun addEditNote(){
         viewModelScope.launch {
-            if(_noteState.value.title.isEmpty() && _noteState.value.content.isEmpty()) return@launch
-            noteRepository.insertNote(_noteState.value)
+           val noteId = noteRepository.insertNote(_noteState.value)
+           if(_noteState.value.alarmTime != null){
+               alarmScheduler.schedule(noteId, _noteState.value.alarmTime!!,_noteState.value.title);
+           }
         }
     }
 
     fun onTriggerColorPickerVisibility(){
         showColorPicker = !(showColorPicker)
+    }
+    fun onDismissTimePicker(){
+        showTimePicker = false
+    }
+
+    fun onShowTimePicker(){
+        showTimePicker = true
+    }
+
+    fun onSetAlarmTime(alarmTime: Long){
+        _noteState.value = _noteState.value.copy(alarmTime = alarmTime)
+    }
+    fun onCancelAlarm(){
+        _noteState.value = _noteState.value.copy(alarmTime = null)
     }
 }

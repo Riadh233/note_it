@@ -1,7 +1,6 @@
 package com.example.to_do_app.ui.navigation
 
-import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.Box
+
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
@@ -20,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,12 +26,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.example.to_do_app.data.alarms.AlarmScheduler
 import com.example.to_do_app.ui.screens.NotesScreen
 import com.example.to_do_app.ui.viewmodels.AddEditNoteViewModel
 import com.example.to_do_app.ui.viewmodels.NoteViewModel
@@ -43,11 +39,12 @@ import com.example.to_do_app.utils.NavigationRoutes
 fun NavGraphBuilder.noteScreenPage(
     navController: NavHostController,
     noteViewModel: NoteViewModel,
-    addEditNoteViewModel: AddEditNoteViewModel
+    addEditNoteViewModel: AddEditNoteViewModel,
 ){
     composable(route = NavigationRoutes.NoteScreenRoute.route) {
         var showActionMenu by remember { mutableStateOf(false) }
         var showAlertDialogue by remember { mutableStateOf(false) }
+        val notesList = noteViewModel.searchResults.collectAsState().value
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -96,14 +93,17 @@ fun NavGraphBuilder.noteScreenPage(
         ) {innerPadding ->
             NotesScreen(
                 modifier = Modifier.padding(innerPadding),
-                notesList = noteViewModel.searchResults.collectAsState().value,
+                notesList = notesList,
                 onNoteClicked = { id ->
                     navController.navigate(NavigationRoutes.AddEditScreenRoute.route)
                     addEditNoteViewModel.getNoteById(id)
                 },
                 searchText = noteViewModel.searchQuery,
                 onUpdateSearchQuery = noteViewModel::updateSearchQuery,
-                onDeleteNote = noteViewModel::deleteNote
+                onDeleteNote = {note ->
+                    noteViewModel.deleteNote(note)
+                    noteViewModel.cancelAlarm(note.id)
+                },
             )
             if(showAlertDialogue){
                 AlertDialog(
@@ -119,6 +119,9 @@ fun NavGraphBuilder.noteScreenPage(
                     confirmButton = {
                         TextButton(
                             onClick = {
+                                notesList.forEach { note ->
+                                    noteViewModel.cancelAlarm(note.id)
+                                }
                                 noteViewModel.deleteAllNotes()
                                 showAlertDialogue = false
                             }

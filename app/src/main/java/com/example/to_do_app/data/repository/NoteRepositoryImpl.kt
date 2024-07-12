@@ -16,13 +16,13 @@ class NoteRepositoryImpl @Inject constructor(
 )  : NoteRepository  {
     private val noteDao : NotesDao = appDatabase.notesDao()
 
-    override suspend fun insertNote(note: Note) {
-        withContext(dispatcherIO){
+    override suspend fun insertNote(note: Note) : Long {
+       return withContext(dispatcherIO){
             noteDao.insertNote(note)
         }
     }
 
-    override suspend fun getNoteById(id: Int): Note {
+    override suspend fun getNoteById(id: Long): Note {
         return withContext(dispatcherIO){
             noteDao.getNoteById(id)
         }
@@ -41,6 +41,12 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun deleteAllNotes() {
         withContext(dispatcherIO){
             noteDao.deleteAllNotes()
+        }
+    }
+
+    override suspend fun resetNoteAlarm(noteId: Long) {
+        withContext(dispatcherIO){
+            noteDao.resetNoteAlarm(noteId)
         }
     }
 }

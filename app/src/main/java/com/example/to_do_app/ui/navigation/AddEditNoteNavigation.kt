@@ -1,47 +1,50 @@
 package com.example.to_do_app.ui.navigation
 
-import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.sharp.DateRange
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.navArgument
 import com.example.to_do_app.R
 import com.example.to_do_app.ui.screens.AddEditNoteScreen
 import com.example.to_do_app.ui.viewmodels.AddEditNoteViewModel
 import com.example.to_do_app.utils.NavigationRoutes
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 fun NavGraphBuilder.addEditScreenPage(
     navController: NavHostController,
-    addEditNoteViewModel: AddEditNoteViewModel
+    addEditNoteViewModel: AddEditNoteViewModel,
 ) {
     composable(route = NavigationRoutes.AddEditScreenRoute.route) {
 
@@ -49,6 +52,7 @@ fun NavGraphBuilder.addEditScreenPage(
         val noteColor = if (noteColorState == -1L) MaterialTheme.colorScheme.surface else Color(
             noteColorState
         )
+        val currentNote = addEditNoteViewModel.notesState.collectAsState()
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -73,10 +77,11 @@ fun NavGraphBuilder.addEditScreenPage(
                                 contentDescription = "set completed"
                             )
                         }
-                        IconButton(onClick = { /*TODO*/ }) {
+                        IconButton(onClick = { addEditNoteViewModel.onShowTimePicker() }) {
                             Icon(
-                                imageVector = Icons.Sharp.DateRange,
-                                contentDescription = "set completed"
+                                painter = painterResource(id = R.drawable.add_reminder),
+                                contentDescription = "set reminder",
+                                tint = MaterialTheme.colorScheme.onBackground
                             )
                         }
                         IconButton(onClick = { addEditNoteViewModel.onTriggerColorPickerVisibility() }) {
@@ -94,7 +99,7 @@ fun NavGraphBuilder.addEditScreenPage(
         ) { innerPadding ->
             AddEditNoteScreen(
                 modifier = Modifier.padding(innerPadding),
-                noteState = addEditNoteViewModel.notesState,
+                note = currentNote,
                 onBackButtonPressed = {
                     addEditNoteViewModel.addEditNote()
                     navController.navigateUp()
@@ -110,12 +115,114 @@ fun NavGraphBuilder.addEditScreenPage(
                     )
                 },
                 onShowColorPicker = addEditNoteViewModel.showColorPicker,
+                showTimePicker = addEditNoteViewModel.showTimePicker,
                 onDismissColorPicker = { addEditNoteViewModel.onTriggerColorPickerVisibility() },
+                onDismissTimePicker = {addEditNoteViewModel.onDismissTimePicker() },
                 onNoteColorSelected = { color ->
                     addEditNoteViewModel.onNoteColorChanged(color)
 
+                },
+                onSetAlarmTime = {hour,minute ->
+                    val noteId = currentNote.value.id
+                    val noteTitle = currentNote.value.title
+                    addEditNoteViewModel.onSetAlarmTime(
+                        getTimeInMillis(
+                            hour = hour,
+                            minute = minute
+                        )
+                    )
+                },
+                onCancelAlarm = {
+                    addEditNoteViewModel.onCancelAlarm()
                 }
             )
         }
     }
 }
+
+@Composable
+fun TimePickerDialog(
+    title: String = "Select Time",
+    onDismissRequest: () -> Unit,
+    confirmButton: @Composable (() -> Unit),
+    dismissButton: @Composable (() -> Unit)? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    content: @Composable () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        ),
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min)
+                .background(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = containerColor
+                ),
+            color = containerColor
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    text = title,
+                    style = MaterialTheme.typography.labelMedium
+                )
+                content()
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
+                ) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    dismissButton?.invoke()
+                    confirmButton()
+                }
+            }
+        }
+    }
+}
+
+fun formatTime(hour: Int, minute: Int): String {
+    val currentTime = Calendar.getInstance()
+    val selectedTime = Calendar.getInstance().apply {
+        set(Calendar.HOUR_OF_DAY, hour)
+        set(Calendar.MINUTE, minute)
+        set(Calendar.SECOND, 0)
+        set(Calendar.MILLISECOND, 0)
+    }
+    if (selectedTime.before(currentTime)) {
+        selectedTime.add(Calendar.DAY_OF_MONTH, 1)
+    }
+
+    val dateFormat = SimpleDateFormat("d MMM 'at' HH:mm", Locale.getDefault())
+    return dateFormat.format(selectedTime.time)
+}
+
+fun getTimeInMillis(hour: Int, minute: Int): Long {
+    val calendar = Calendar.getInstance()
+    val currentYear = calendar.get(Calendar.YEAR)
+    val currentMonth = calendar.get(Calendar.MONTH)
+    val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
+
+    calendar.set(Calendar.HOUR_OF_DAY, hour)
+    calendar.set(Calendar.MINUTE, minute)
+    calendar.set(Calendar.SECOND, 0)
+    calendar.set(Calendar.MILLISECOND, 0)
+    if (calendar.timeInMillis <= System.currentTimeMillis()) {
+        calendar.add(Calendar.DAY_OF_MONTH, 1)
+    }
+    return calendar.timeInMillis
+}
+
+

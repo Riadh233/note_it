@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.to_do_app.data.alarms.AlarmScheduler
 import com.example.to_do_app.domain.model.Note
 import com.example.to_do_app.domain.repository.NoteRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +32,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NoteViewModel @Inject constructor(
-    private val noteRepository: NoteRepository
+    private val noteRepository: NoteRepository,
+    private val alarmScheduler: AlarmScheduler
 ) : ViewModel() {
     private val _notesState = MutableStateFlow<List<Note>>(emptyList())
     var searchQuery by mutableStateOf("")
@@ -47,19 +49,12 @@ class NoteViewModel @Inject constructor(
 
     init {
         noteRepository.getAllNotes()
-            .onEach { notes -> _notesState.value = notes } // Handle collected data
+            .onEach { notes ->
+                _notesState.value = notes
+            } // Handle collected data
             .launchIn(viewModelScope) // Start collecting in the ViewModel's scope
     }
-    fun insertNote(note : Note){
-        viewModelScope.launch {
-            noteRepository.insertNote(note)
-        }
-    }
-    fun getNoteById(id : Int){
-        viewModelScope.launch {
-            noteRepository.getNoteById(id)
-        }
-    }
+
     fun deleteNote(note : Note){
         viewModelScope.launch {
             noteRepository.deleteNote(note)
@@ -85,5 +80,11 @@ class NoteViewModel @Inject constructor(
     }
     fun updateSearchQuery(query: String){
         searchQuery = query
+    }
+
+    fun cancelAlarm(noteId : Long){
+        viewModelScope.launch {
+            alarmScheduler.cancel(noteId)
+        }
     }
 }
