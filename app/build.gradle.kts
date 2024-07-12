@@ -84,4 +84,7 @@ dependencies {
     kapt (libs.hilt.compiler)
     implementation (libs.androidx.hilt.navigation.compose)
 
+    implementation(libs.accompanist.permissions.v0280)
+    implementation(libs.androidx.core.splashscreen)
+
 }

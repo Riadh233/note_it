@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -71,12 +70,6 @@ fun NavGraphBuilder.addEditScreenPage(
                         }
                     },
                     actions = {
-                        IconButton(onClick = { /*TODO*/ }) {
-                            Icon(
-                                imageVector = Icons.Outlined.CheckCircle,
-                                contentDescription = "set completed"
-                            )
-                        }
                         IconButton(onClick = { addEditNoteViewModel.onShowTimePicker() }) {
                             Icon(
                                 painter = painterResource(id = R.drawable.add_reminder),
@@ -123,8 +116,6 @@ fun NavGraphBuilder.addEditScreenPage(
 
                 },
                 onSetAlarmTime = {hour,minute ->
-                    val noteId = currentNote.value.id
-                    val noteTitle = currentNote.value.title
                     addEditNoteViewModel.onSetAlarmTime(
                         getTimeInMillis(
                             hour = hour,
@@ -211,10 +202,6 @@ fun formatTime(hour: Int, minute: Int): String {
 
 fun getTimeInMillis(hour: Int, minute: Int): Long {
     val calendar = Calendar.getInstance()
-    val currentYear = calendar.get(Calendar.YEAR)
-    val currentMonth = calendar.get(Calendar.MONTH)
-    val currentDay = calendar.get(Calendar.DAY_OF_MONTH)
-
     calendar.set(Calendar.HOUR_OF_DAY, hour)
     calendar.set(Calendar.MINUTE, minute)
     calendar.set(Calendar.SECOND, 0)

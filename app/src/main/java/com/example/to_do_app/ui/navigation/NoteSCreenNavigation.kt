@@ -29,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.example.to_do_app.data.alarms.AlarmScheduler
 import com.example.to_do_app.ui.screens.NotesScreen
 import com.example.to_do_app.ui.viewmodels.AddEditNoteViewModel
 import com.example.to_do_app.ui.viewmodels.NoteViewModel

@@ -1,7 +1,6 @@
 package com.example.to_do_app.ui.screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -44,7 +43,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,10 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.example.to_do_app.domain.model.Note
 import com.example.to_do_app.ui.navigation.TimePickerDialog
-import com.example.to_do_app.ui.navigation.formatTime
-import com.example.to_do_app.ui.navigation.getTimeInMillis
 import com.example.to_do_app.utils.Constants.NOTE_COLORS
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -289,16 +284,18 @@ fun AlarmItem(
             Icon(
                 imageVector = Icons.Sharp.Notifications,
                 contentDescription = "icon ",
-                modifier = Modifier.size(15.dp)
+                modifier = Modifier.size(15.dp),
+                tint = Color.Black
             )
-            Text(text = alarmTime, fontSize = 10.sp, fontWeight = FontWeight.SemiBold)
+            Text(text = alarmTime, fontSize = 10.sp, fontWeight = FontWeight.SemiBold,color = Color.Black)
            if (showCancelButton){
                Icon(
                    imageVector = Icons.Default.Clear,
                    contentDescription = "cancel alarm",
                    modifier = Modifier
                        .size(15.dp)
-                       .clickable {onCancelAlarm()}
+                       .clickable {onCancelAlarm()},
+                   tint = Color.Black
                )
            }
         }

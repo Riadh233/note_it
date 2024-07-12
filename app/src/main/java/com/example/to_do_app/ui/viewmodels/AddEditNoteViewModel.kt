@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.to_do_app.MyApplication
 import com.example.to_do_app.data.alarms.AlarmScheduler
 import com.example.to_do_app.domain.model.Note
 import com.example.to_do_app.domain.repository.NoteRepository
@@ -31,50 +30,59 @@ class AddEditNoteViewModel @Inject constructor(
         private set
 
 
-    fun getNoteById(noteId : Long){
+    fun getNoteById(noteId: Long) {
         viewModelScope.launch {
-            if(noteId != 0L){
+            if (noteId != 0L) {
                 _noteState.value = noteRepository.getNoteById(id = noteId)
-            }else{
+            } else {
                 _noteState.value = Note.EMPTY_NOTE
             }
         }
     }
 
-    fun onNoteTitleChanged(title : String){
+    fun onNoteTitleChanged(title: String) {
         _noteState.value = _noteState.value.copy(title = title)
     }
-    fun onNoteContentChanged(content : String){
+
+    fun onNoteContentChanged(content: String) {
         _noteState.value = _noteState.value.copy(content = content)
     }
-    fun onNoteColorChanged(color: Long){
-        _noteState.value =  _noteState.value.copy(color = color)
+
+    fun onNoteColorChanged(color: Long) {
+        _noteState.value = _noteState.value.copy(color = color)
     }
 
-    fun addEditNote(){
+    fun addEditNote() {
         viewModelScope.launch {
-           val noteId = noteRepository.insertNote(_noteState.value)
-           if(_noteState.value.alarmTime != null){
-               alarmScheduler.schedule(noteId, _noteState.value.alarmTime!!,_noteState.value.title);
-           }
+            if (_noteState.value.title.isEmpty() && _noteState.value.content.isEmpty() && _noteState.value.alarmTime == null) return@launch
+            val noteId = noteRepository.insertNote(_noteState.value)
+            if (_noteState.value.alarmTime != null) {
+                alarmScheduler.schedule(
+                    noteId,
+                    _noteState.value.alarmTime!!,
+                    _noteState.value.title
+                );
+            }
         }
     }
 
-    fun onTriggerColorPickerVisibility(){
+    fun onTriggerColorPickerVisibility() {
         showColorPicker = !(showColorPicker)
     }
-    fun onDismissTimePicker(){
+
+    fun onDismissTimePicker() {
         showTimePicker = false
     }
 
-    fun onShowTimePicker(){
+    fun onShowTimePicker() {
         showTimePicker = true
     }
 
-    fun onSetAlarmTime(alarmTime: Long){
+    fun onSetAlarmTime(alarmTime: Long) {
         _noteState.value = _noteState.value.copy(alarmTime = alarmTime)
     }
-    fun onCancelAlarm(){
+
+    fun onCancelAlarm() {
         _noteState.value = _noteState.value.copy(alarmTime = null)
     }
 }
